@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -13,11 +14,15 @@ var (
 
 func main() {
 	log.Println("Starting API Gateway")
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /trip/preview", handleTripPreview)
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Hello from API Gateway"))
-	})
-
-	http.ListenAndServe(httpAddr, nil)
+	s := &http.Server{
+		Addr:    httpAddr,
+		Handler: mux,
+	}
+	if err := s.ListenAndServe(); err != nil {
+		err = fmt.Errorf("error in starting server: %w", err)
+		log.Print(err)
+	}
 }
