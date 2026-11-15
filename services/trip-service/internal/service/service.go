@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"ride-sharing/services/trip-service/internal/domain"
+	"ride-sharing/shared/types"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -27,4 +28,18 @@ func (s *service) CreateTrip(ctx context.Context, fare *domain.RideFareModel) (*
 	}
 	return s.repo.CreateTrip(ctx, t)
 
+}
+
+func (s *service) GetRoute(ctx context.Context, pickup, destination *types.Coordinate) (*types.OsrmApiResponse, error) {
+
+	resp := types.OsrmApiResponse{}
+	//create the get osrm url with formatting using pickup and destination
+
+	// do a get call to the url
+
+	// store the reponse in variable
+
+	//parse this variable in the *types.OsrmApiResponse
+
+	return &resp, nil
 }
