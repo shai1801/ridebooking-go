@@ -18,7 +18,7 @@ type Coordinate struct {
 type OsrmApiResponse struct {
 	Routes []struct {
 		Geometry struct {
-			Coordinate [][]float64
+			Coordinates [][]float64 `json:"coordinates"`
 		} `json:"geometry"`
 		Duration float64 `json:"duration"`
 		Distance float64 `json:"distance"`
