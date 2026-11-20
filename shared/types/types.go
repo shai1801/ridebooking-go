@@ -14,13 +14,3 @@ type Coordinate struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }
-
-type OsrmApiResponse struct {
-	Routes []struct {
-		Geometry struct {
-			Coordinates [][]float64 `json:"coordinates"`
-		} `json:"geometry"`
-		Duration float64 `json:"duration"`
-		Distance float64 `json:"distance"`
-	} `json:"routes"`
-}
