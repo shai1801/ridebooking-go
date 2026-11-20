@@ -1,14 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
+	"ride-sharing/services/api-gateway/grpc_clients"
 	"ride-sharing/shared/contracts"
 )
 
 func handleTripPreview(w http.ResponseWriter, r *http.Request) {
+
 	var reqBody previewTripRequest
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		http.Error(w, "failed to parse JSON data", http.StatusBadRequest)
@@ -17,35 +18,30 @@ func handleTripPreview(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	if reqBody.UserID == "" {
-		http.Error(w, "user ID is required", http.StatusBadRequest)
-		return
-	}
-
-	jsonBody, _ := json.Marshal(reqBody)
-	reader := bytes.NewReader(jsonBody)
 	////TODO: Call trip service
 
-	resp, err := http.Post("http://trip-service:8083/preview", "application/json", reader)
+	tripClient, err := grpc_clients.NewTripServiceClient()
 
 	if err != nil {
-		log.Print(err)
+		log.Printf("error in createing grpc trip client: %v", err)
+		http.Error(w, "trip service unavailable", http.StatusServiceUnavailable)
 		return
 	}
 
-	defer resp.Body.Close()
+	defer tripClient.Close()
 
-	var respBody any
-	if err := json.NewDecoder(resp.Body).Decode(&respBody); err != nil {
-		http.Error(w, "failed to parse JSON data from trip service", http.StatusBadRequest)
+	resp, err := tripClient.Client.PreviewTrip(r.Context(), reqBody.toProto())
+
+	if err != nil {
+		log.Printf("error in fetching grpc Trip Preview Response: %v", err)
+		http.Error(w, "failed to preview trip", http.StatusBadGateway)
 		return
 	}
 
-	response := contracts.APIResponse{Data: respBody}
+	response := contracts.APIResponse{Data: resp}
 
 	if err := writeJSON(w, http.StatusAccepted, response); err != nil {
-		http.Error(w, "failed to parse the response:", http.StatusInternalServerError)
-		return
+		log.Printf("error writing trip preview response: %v", err)
 	}
 
 }
