@@ -61,6 +61,7 @@ func handleTripStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer tripClient.Close()
 	resp, err := tripClient.Client.CreateTrip(r.Context(), startTripRequest.toProto())
 
 	if err != nil {
