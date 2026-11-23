@@ -45,3 +45,35 @@ func handleTripPreview(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func handleTripStart(w http.ResponseWriter, r *http.Request) {
+
+	var startTripRequest *startTripRequest
+	if err := json.NewDecoder(r.Body).Decode(&startTripRequest); err != nil {
+		log.Printf("error in unmarshalling the trip start request to object: %v", err)
+	}
+
+	defer r.Body.Close()
+
+	tripClient, err := grpc_clients.NewTripServiceClient()
+	if err != nil {
+		log.Printf("error in creating GRPC client: %v", err)
+		return
+	}
+
+	resp, err := tripClient.Client.CreateTrip(r.Context(), startTripRequest.toProto())
+
+	if err != nil {
+		log.Printf("error in getting response from start trip service: %v", err)
+		http.Error(w, "failed to create trip", http.StatusBadGateway)
+		return
+	}
+
+	response := contracts.APIResponse{
+		Data: resp,
+	}
+	if err := writeJSON(w, http.StatusCreated, response); err != nil {
+		http.Error(w, "error in creating trip", http.StatusBadGateway)
+		return
+	}
+}

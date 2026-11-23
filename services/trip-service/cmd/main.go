@@ -18,7 +18,10 @@ var GrpcAddr = ":9093"
 
 func main() {
 
+	//Initialize repository
 	inmemRepo := repository.NewInmemRepository()
+
+	//Initialize srvice
 	svc := service.NewService(inmemRepo)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -36,7 +39,10 @@ func main() {
 	if err != nil {
 		log.Printf("failed to listen: %v", err)
 	}
+	//Initialize Server
 	grpcServer := grpcserver.NewServer()
+
+	//Initialize Handler
 	grpc.NewGRPCHandler(grpcServer, svc)
 
 	log.Printf("starting gRPC server Trip Service on port %s", lis.Addr().String())
